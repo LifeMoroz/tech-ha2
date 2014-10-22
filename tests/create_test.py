@@ -17,7 +17,6 @@ class AdCreationTestCase(BasePage):
         ad_page.banner_form.fill_banner(**BANNER_DATA)
         AdCreationTestCase.ad_page = ad_page
 
-    # @unittest.SkipTest
     def test_banner_preview(self):
         """
             Проверяет правильность данных в отправленном баннере
@@ -27,7 +26,6 @@ class AdCreationTestCase(BasePage):
 
         self.assertEqual(BANNER_DATA['url'], url, "Entered url doesn't match the one in banner_preview")
 
-    # @unittest.SkipTest
     def test_sex_on_toggling(self):
         """
             Проверка того, что данные в sex сохраняются при сворачивании списка настроек

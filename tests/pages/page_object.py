@@ -5,6 +5,7 @@ __author__ = 'ruslan'
 import urlparse
 from selenium.webdriver.common.action_chains import ActionChains
 from components import *
+from selenium.webdriver.support import expected_conditions
 
 
 class TopMenu(Component):
@@ -164,7 +165,6 @@ class BannerForm(BannerComponent):
         BannerComponent.__init__(self, driver)
 
     def wait_for_banner_close(self):
-        from selenium.webdriver.support import expected_conditions
         WebDriverWait(self.driver, 1, 0.1).until(expected_conditions.element_to_be_clickable(self.SAVE_BANNER_BUTTON))
 
     def set_url(self, url):
@@ -265,6 +265,7 @@ class SexTargeting(TargetingComponent):
 
     def toggle_wrapper(self):
         value, value_wrapper = self._get_value_and_wrapper()
+        WebDriverWait(self.driver, WEB_DRIVER_DEFAULT_WAIT, WEB_DRIVER_POLL_FREQ).until(lambda x: value.is_enabled())
         value.click() # toggle the targeting list
         return self
 
@@ -315,6 +316,8 @@ class WhereTargeting(TargetingComponent):
         return len(not_chosen) == 0, not_chosen
 
     def clear_all(self):
+        WebDriverWait(self.driver, WEB_DRIVER_DEFAULT_WAIT, WEB_DRIVER_POLL_FREQ).until_not(
+            lambda x: x.find_element(By.CSS_SELECTOR, ".tree .spinner"))
         for val in REGIONS_ID.values():
             if self.check_chosen_by_id(val):
                 self.toggle(val)

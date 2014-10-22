@@ -1,4 +1,5 @@
 # coding=utf-8
+import unittest
 from selenium.webdriver.common.by import By
 from tests.basic_testcase import BasePage
 from tests.config import *
@@ -27,14 +28,14 @@ class AdEditTestCase(BasePage):
         ad_page.banner_form.fill_banner(**BANNER_DATA)
         ad_page.submit_campaign()
 
-        cls.editor = CampaignsPage(cls.driver).campaigns_list.get_campaign(CAMPAIGN_NAME).edit()
+        cls.campaign = CampaignsPage(cls.driver)
+        cls.editor = cls.campaign.campaigns_list.get_campaign(CAMPAIGN_NAME).edit()
 
     @classmethod
     def tearDownClass(cls):
-        campaigns_page.open()
-        campaigns_page.campaigns_list.get_campaign(CAMPAIGN_NAME).delete()
+        cls.campaign.open()
+        cls.campaign.campaigns_list.get_campaign(CAMPAIGN_NAME).delete()
 
-    # @unittest.SkipTest
     def test_campaign_name_correct(self):
         """
             Проверка правильности имени кампании
@@ -42,7 +43,6 @@ class AdEditTestCase(BasePage):
         name = self.editor.base_settings.get_campaign_name()
         self.assertEqual(CAMPAIGN_NAME, name)
 
-    # @unittest.SkipTest
     def test_pad_correct(self):
         """
             Проверка правильности площадки
@@ -50,7 +50,6 @@ class AdEditTestCase(BasePage):
         pad = self.editor.base_settings.get_pad()
         self.assertEqual(PAD_TYPE, pad)
 
-    # @unittest.SkipTest
     def test_banner_preview_correct(self):
         """
             Проверка правильности данных в баннере
@@ -60,42 +59,24 @@ class AdEditTestCase(BasePage):
 
         self.assertIn(BANNER_DATA['url'], url, "URL isn't correct")
 
-    # @unittest.SkipTest
-    def test_income_correct(self):
+    def test_where_in_chosen_box(self):
         """
-            Проверяет то, что income был сохранен верно
+            Проверка, что where в списке выделенных
         """
-        income = self.editor.income_targeting
-        text = income.get_header_text()
+        where_targeting = self.editor.where_targeting
+        where_targeting.clear_all()
+        for where in TEST_WHERE_DATA:
+            where_targeting.toggle(REGIONS_ID[where])
 
-        income._toggle_settings()
-        all_incomes_checked, not_checked = income.check_chosen_by_id(INCOME_TARGETINGS)
+        chosen, not_chosen = where_targeting.check_in_chosen_box(TEST_WHERE_DATA)
 
-        self.assertEqual(text, IncomeTargeting.HEADER_SELECTED_TEXT, 'No feedback about his (her) actions')
-        self.assertTrue(all_incomes_checked, 'Some of the incomes have not been checked: %s' % list_to_str(not_checked))
+        self.assertTrue(chosen, 'Some of the incomes have not been chosen: %s' % not_chosen)
 
-    # @unittest.SkipTest
-    def test_dates_correct(self):
+    def test_sex_chosen(self):
         """
-            Проверяет то, что даты работы кампании были сохранены верно
+            Проверяет что выбран именно нужный пол
         """
-        campaign_time = self.editor.campaign_time
-        campaign_time._toggle_settings()
+        sex_sex_sex = self.editor.sex_targeting
+        all_incomes_checked, not_checked = sex_sex_sex.check_chosen(TEST_SEX_DATA)
 
-        from_date, to_date = campaign_time.get_dates()
-
-        self.assertEqual(FROM_DATE, from_date, 'From date is incorrect')
-        self.assertEqual(TO_DATE, to_date, 'To date is incorrect')
-
-    # @unittest.SkipTest
-    def test_dates_delta_correct(self):
-        """
-            Проверяет то, что разница между днями посчитана верно
-        """
-        campaign_time = self.editor.campaign_time
-        campaign_time._toggle_settings()
-
-        delta = int(campaign_time.get_length_in_days())
-        actual_delta = (TO_DATE - FROM_DATE).days + 1
-
-        self.assertEqual(actual_delta, delta)
+        self.assertTrue(all_incomes_checked, 'Some of the incomes have not been checked: %s' % not_checked)
